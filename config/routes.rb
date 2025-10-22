@@ -4,6 +4,12 @@ Rails.application.routes.draw do
   root "imports#new"
   resources :imports, only: [:new, :create]  # ← まずはこの2つだけ
 
+  # 閲覧用（GET だけ /payrolls）
+  resources :payrolls, only: [:index]
+
+  # ★ 追加：社員レポート（1アクション）
+  get "reports/employee", to: "reports#employee", as: :employee_report
+
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check

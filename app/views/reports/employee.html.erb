@@ -1,0 +1,112 @@
+<h1>社員レポート（横持ち）</h1>
+
+<div class="page">  <!-- ← 余白用の外枠 -->
+
+<%= form_with url: employee_report_path, method: :get, local: true do %>
+  <p>
+    社員：
+    <%= select_tag(
+          :employee_id,
+          options_from_collection_for_select(@employees, :id, ->(e){ "#{e.code} / #{e.name}" }, params[:employee_id]),
+          include_blank: "選んでください"
+        ) %>
+    <%= submit_tag "表示" %>
+  </p>
+<% end %>
+
+<% if @employee %>
+  <div class="nav">
+    <% if @has_prev %>
+      <%= link_to "◀︎ 古い月へ", employee_report_path(employee_id: @employee.id, page: @page + 1), class: "btn" %>
+    <% else %>
+      <span class="btn disabled">◀︎ 古い月へ</span>
+    <% end %>
+
+    <% if @has_next %>
+      <%= link_to "新しい月へ ▶︎", employee_report_path(employee_id: @employee.id, page: @page - 1), class: "btn" %>
+    <% else %>
+      <span class="btn disabled">新しい月へ ▶︎</span>
+    <% end %>
+  </div>
+
+  <p>対象社員：<strong><%= @employee.code %> <%= @employee.name %></strong></p>
+
+  <style>
+    /* ==== 余白＆文字サイズ ==== */
+    .page { padding: 0 24px; }                 /* 左右にゆとり */
+    .nav  { margin: 8px 0; }
+    .btn  { display:inline-block; padding:4px 10px; border:1px solid #aaa; border-radius:4px; text-decoration:none; background:#fff; }
+    .btn.disabled { opacity:.35; cursor:not-allowed; border-color:#ccc; }
+
+    /* ==== 表（14等分は維持） ==== */
+    .scroll-x { overflow-x: auto; }
+    .grid-table {
+      border-collapse: collapse;
+      table-layout: fixed;
+      width: 100%;
+      font-size: 15px;             /* ← 文字を少し大きく */
+    }
+    .grid-table th, .grid-table td {
+      border: 1px solid #999;
+      padding: 8px 10px;           /* ← 余白も少し増やす */
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    .grid-table th { background: #eee; }
+
+    /* 列幅：14等分（項目1・月最大12・右スペーサ1） */
+    .w14 { width: 7.142857%; }     /* 1/14 固定 */
+
+    .num  { text-align: right; font-family: ui-monospace, Menlo, monospace; }
+    .rowh { background: #f7f7f7; }
+
+    /* グループ線/合計強調（既存ヘルパー対応） */
+    .grp-top    td, .grp-top th    { border-top-width: 3px; border-top-color: #666; }
+    .grp-bottom td, .grp-bottom th { border-bottom-width: 3px; border-bottom-color: #666; }
+    .total-row th, .total-row td   { font-weight: 700; background: #e7f2ff; }
+  </style>
+
+  <div class="scroll-x">
+    <table class="grid-table">
+      <colgroup>
+        <!-- 項目 1枠 -->
+        <col class="w14">
+        <% max_months = 12 %>
+        <!-- 表示する月（最大12枠） -->
+        <% @periods.each do %><col class="w14"><% end %>
+        <!-- 足りない月は空列で埋める（幅を14等分で維持） -->
+        <% (max_months - @periods.size).times do %><col class="w14"><% end %>
+        <!-- 右スペーサ 1枠 -->
+        <col class="w14">
+      </colgroup>
+
+      <tr>
+        <th>項目</th>
+        <% @periods.each do |p| %>
+          <th><%= "#{p.year}年#{p.month}月" %></th>
+        <% end %>
+        <% (max_months - @periods.size).times do %>
+          <th></th>
+        <% end %>
+        <th></th> <!-- 右スペース -->
+      </tr>
+
+      <% @items.each do |item| %>
+        <tr class="<%= row_class_for_item(item.name) %>">
+          <th class="rowh"><%= item.name %></th>
+          <% @periods.each do |p| %>
+            <% cell = @cell_map[p.id][item.id] %>
+            <td class="num"><%= display_cell(cell, item_name: item.name) %></td>
+          <% end %>
+          <% (max_months - @periods.size).times do %>
+            <td></td>
+          <% end %>
+          <td></td> <!-- 右スペース -->
+        </tr>
+      <% end %>
+    </table>
+  </div>
+<% end %>
+
+</div> <!-- /.page -->

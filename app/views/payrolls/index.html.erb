@@ -1,0 +1,66 @@
+<!-- app/views/payrolls/index.html.erb -->
+<h1>明細閲覧</h1>
+
+<%= form_with url: payrolls_path, method: :get, local: true do %>
+  <p>
+    月（Period）：
+    <%= select_tag :period_id,
+          options_from_collection_for_select(@periods, :id, ->(p){ "#{p.year}年#{p.month}月" }, params[:period_id]),
+          include_blank: "選んでください" %>
+  </p>
+
+  <p>
+    社員：
+    <%= select_tag :employee_id,
+          options_from_collection_for_select(@employees, :id, ->(e){ "#{e.code} / #{e.name}" }, params[:employee_id]),
+          include_blank: "選んでください" %>
+  </p>
+
+  <p><%= submit_tag "表示" %></p>
+<% end %>
+
+<% if @period && @employee %>
+  <hr>
+  <p>
+    対象：<strong><%= @period.year %>年 <%= @period.month %>月</strong> /
+    <strong><%= @employee.code %> <%= @employee.name %></strong>
+  </p>
+    <style>
+    .xl-table {
+        border-collapse: collapse;
+        width: 100%;
+        max-width: 640px;
+    }
+    .xl-table th, .xl-table td {
+        border: 1px solid #444;
+        padding: 6px 8px;
+    }
+    .xl-table th {
+        background: #eee;
+        position: sticky;
+        top: 0;
+    }
+    .xl-num {
+        text-align: right;
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        white-space: nowrap;
+    }
+    .xl-row:nth-child(even) { background: #fafafa; }
+    </style>
+
+    <table class="xl-table">
+    <tr>
+        <th style="width: 60%;">項目</th>
+        <th style="width: 40%;">値</th>
+    </tr>
+    <% @items.each do |item| %>
+        <% cell = @cell_by_item_id[item.id] %>
+        <tr class="xl-row">
+        <td><%= item.name %></td>
+        <td class="xl-num">
+        <%= display_cell(cell, item_name: item.name) %>
+        </td>
+        </tr>
+    <% end %>
+    </table>
+<% end %>

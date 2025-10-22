@@ -9,7 +9,16 @@ class ImportsController < ApplicationController
 
     if @form.valid?
       @result = sheet_parse(@form.file)  # ← 下のprivateメソッド（超シンプル）
-      render :new
+
+      if params[:save] == "1" && @result[:ok]
+      # 明細まで保存する実装に一本化（期間・社員・項目・明細）
+      persist_all(@result, @form.file)
+      flash.now[:notice] = "期間・社員・項目を保存しました。"
+      end
+
+    respond_to do |f|
+        f.html { render :new }
+    end
     else
       flash.now[:alert] = @form.errors.full_messages.join(" / ")
       render :new, status: :unprocessable_entity
@@ -24,6 +33,65 @@ class ImportsController < ApplicationController
   # - 7行目=社員番号（合計/小計/計 は除外）
   # - 8行目=社員名（「○名」「合計/小計/計」除外）
   # - B9以降=項目名をユニーク抽出
+
+  def persist_all(result, uploaded)
+    # 1) 期間
+    per = if (p = result.dig(:meta, :period))
+      Period.find_or_create_by!(year: p[:year], month: p[:month])
+    else
+      # 期間が取れない時は保存しない（仕様上）
+      return
+    end
+
+    # 2) 社員（codeで upsert 風）
+    emp_map = {}
+    result[:employees].each do |e|
+      emp = Employee.find_or_initialize_by(code: e[:code])
+      emp.name = e[:name].to_s.strip if e[:name].present?
+      emp.save!
+      emp_map[e[:col_index]] = emp   # ← 列Index→Employee の対応表
+    end
+
+    # 3) 項目（name で find_or_create）＋ 最初に見つけた row_index を記録
+    item_map = {}
+    result[:items].each do |it|
+    item = Item.find_or_create_by!(name: it[:name].to_s.strip)
+
+    # ★ ここを追加：まだ row_index が空なら保存（テンプレ固定を想定）
+    if item.row_index.nil?
+        item.update!(row_index: it[:row_index])
+    end
+
+    item_map[it[:row_index]] = item  # ← 行Index→Item の対応表
+    end
+
+    # 4) セル値（行×列の交差を走査して保存）
+    x     = open_spreadsheet(uploaded)
+    sheet = x.sheet(0)
+
+    item_map.each do |row_idx, item|
+      emp_map.each do |col_idx, emp|
+        val = sheet.cell(row_idx, col_idx)
+        next if val.nil? || (val.respond_to?(:empty?) && val.empty?)
+
+        raw = val.to_s.strip
+        amount = begin
+          # 数値として読めるものだけ小数で格納
+          Float(raw)
+        rescue
+          nil
+        end
+
+        cell = PayrollCell.find_or_initialize_by(
+          period: per, employee: emp, item: item
+        )
+        cell.raw    = raw
+        cell.amount = amount
+        cell.save!
+      end
+    end
+  end
+
   # ========= REPLACE from here =========
   def sheet_parse(uploaded)
     require "roo"
@@ -56,10 +124,17 @@ class ImportsController < ApplicationController
       b = sheet.cell(r, 2) # B列
       row_blank = (sheet.row(r) rescue []).compact.empty?
       break if b.nil? && row_blank
-      items << b.to_s.gsub(/\p{Space}+/, " ").strip if b.present?   # ← ここだけ整形あり
+      if b.present?
+        name = b.to_s.gsub(/\p{Space}+/, " ").strip
+        items << { row_index: r, name: name }
+      end
       r += 1
     end
-    items.uniq!
+    # 表示用は名前ユニークにしつつ、最初に出た行番号を保持
+    items = items
+              .group_by { _1[:name] }
+              .map { |name, arr| { row_index: arr.first[:row_index], name: name } }
+
 
     {
       ok: ok_a6,
@@ -82,7 +157,7 @@ class ImportsController < ApplicationController
     end
   end
   # ========= ADD end =========
-  
+
   # ---- 小さな助っ人（下は読めればOK）----
   def open_spreadsheet(uploaded)
     path = uploaded.respond_to?(:path) ? uploaded.path : uploaded

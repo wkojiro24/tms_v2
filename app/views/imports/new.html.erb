@@ -12,6 +12,14 @@
               multipart: true,
               data: { turbo: false } do %> 
   <p><%= file_field_tag :file, accept: ".xlsx,.xls,.csv" %></p>
+  
+  <p>
+    <label>
+      <%= check_box_tag :save, "1" %>
+      取り込み結果をDBに保存（期間・社員・項目）
+    </label>
+  </p>
+
   <p><%= submit_tag "取り込む" %></p>
 <% end %>
 

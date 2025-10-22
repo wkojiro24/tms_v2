@@ -21,7 +21,8 @@ gem "jbuilder"
 
 gem "roo"         # xlsx読込
 gem "roo-xls"     # xls対応（将来用）
-gem "rubyzip"     
+gem "rubyzip"
+gem "csv"
 # Use Kredis to get higher-level data types in Redis [https://github.com/rails/kredis]
 # gem "kredis"
 
