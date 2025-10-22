@@ -1,0 +1,64 @@
+<!-- app/views/imports/new.html.erb -->
+<h1>取り込み（超シンプル）</h1>
+
+<% if flash[:alert].present? %>
+  <div style="padding:8px; background:#fee; border:1px solid #fbb; margin-bottom:12px;">
+    <%= flash[:alert] %>
+  </div>
+<% end %>
+
+<%= form_with url: imports_path,
+              local: true, 
+              multipart: true,
+              data: { turbo: false } do %> 
+  <p><%= file_field_tag :file, accept: ".xlsx,.xls,.csv" %></p>
+  <p><%= submit_tag "取り込む" %></p>
+<% end %>
+
+<% if @result.present? %>
+  <hr>
+  <h2>取り込み結果</h2>
+
+  <p>
+    対象年月：
+    <% if @result[:meta][:period] %>
+      <strong><%= @result[:meta][:period][:year] %>年 <%= @result[:meta][:period][:month] %>月</strong>
+    <% else %>
+      <em>不明</em>
+    <% end %>
+  </p>
+
+  <h3>社員（employees）</h3>
+  <% if @result[:employees].present? %>
+    <table border="1" cellpadding="6" cellspacing="0">
+      <tr><th>列Index</th><th>社員番号</th><th>氏名</th></tr>
+      <% @result[:employees].each do |e| %>
+        <tr>
+          <td><%= e[:col_index] %></td>
+          <td><%= e[:code] %></td>
+          <td><%= e[:name] %></td>
+        </tr>
+      <% end %>
+    </table>
+  <% else %>
+    <p>（社員は見つかりませんでした）</p>
+  <% end %>
+
+  <h3>項目（items）</h3>
+  <% if @result[:items].present? %>
+    <ul>
+      <% @result[:items].each do |it| %>
+        <li><%= it %></li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p>（項目は見つかりませんでした）</p>
+  <% end %>
+
+  <details style="margin-top:10px;">
+    <summary>JSON（デバッグ用）</summary>
+    <pre style="white-space:pre-wrap; background:#f7f7f7; padding:10px; border:1px solid #ddd;">
+<%= JSON.pretty_generate(@result) %>
+    </pre>
+  </details>
+<% end %>
