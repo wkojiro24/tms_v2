@@ -52,18 +52,21 @@ class ImportsController < ApplicationController
       emp_map[e[:col_index]] = emp   # ← 列Index→Employee の対応表
     end
 
-    # 3) 項目（name で find_or_create）＋ 最初に見つけた row_index を記録
+    # 3) 項目（name で find_or_create）＋ 期間別の行順を保存
     item_map = {}
     result[:items].each do |it|
-    item = Item.find_or_create_by!(name: it[:name].to_s.strip)
+      name = it[:name].to_s.strip
+      row  = it[:row_index]
 
-    # ★ ここを追加：まだ row_index が空なら保存（テンプレ固定を想定）
-    if item.row_index.nil?
-        item.update!(row_index: it[:row_index])
-    end
+      item = Item.find_or_create_by!(name: name)
+      item_map[row] = item  # 行Index→Item の対応表（そのまま）
 
-    item_map[it[:row_index]] = item  # ← 行Index→Item の対応表
-    end
+        # ★ここが追加：Period×Item の行番号を upsert して記録
+        ItemOrder.find_or_initialize_by(period: per, item: item).tap do |io|
+          io.row_index = row
+          io.save!
+        end
+      end
 
     # 4) セル値（行×列の交差を走査して保存）
     x     = open_spreadsheet(uploaded)

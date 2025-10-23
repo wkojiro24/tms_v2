@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_22_104520) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_23_093355) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -20,6 +20,17 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_22_104520) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["code"], name: "index_employees_on_code", unique: true
+  end
+
+  create_table "item_orders", force: :cascade do |t|
+    t.bigint "period_id", null: false
+    t.bigint "item_id", null: false
+    t.integer "row_index", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["item_id"], name: "index_item_orders_on_item_id"
+    t.index ["period_id", "item_id"], name: "index_item_orders_on_period_id_and_item_id", unique: true
+    t.index ["period_id"], name: "index_item_orders_on_period_id"
   end
 
   create_table "items", force: :cascade do |t|
@@ -52,6 +63,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_22_104520) do
     t.index ["year", "month"], name: "index_periods_on_year_and_month", unique: true
   end
 
+  add_foreign_key "item_orders", "items"
+  add_foreign_key "item_orders", "periods"
   add_foreign_key "payroll_cells", "employees"
   add_foreign_key "payroll_cells", "items"
   add_foreign_key "payroll_cells", "periods"

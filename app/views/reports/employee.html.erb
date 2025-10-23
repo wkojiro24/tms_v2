@@ -38,6 +38,10 @@
     .btn  { display:inline-block; padding:4px 10px; border:1px solid #aaa; border-radius:4px; text-decoration:none; background:#fff; }
     .btn.disabled { opacity:.35; cursor:not-allowed; border-color:#ccc; }
 
+
+    .section-row th, .section-row td { 
+      background: #eef4ff; font-weight: 700; border-top: 3px solid #666;
+    }
     /* ==== 表（14等分は維持） ==== */
     .scroll-x { overflow-x: auto; }
     .grid-table {
@@ -92,19 +96,44 @@
         <th></th> <!-- 右スペース -->
       </tr>
 
+
+      <%# --- 1) 区分ごとにバケツ分け（元の並びは区分内で保持） --- %>
+      <% sections = {attendance: [], wage: [], deduction: [], summary: [], other: []} %>
       <% @items.each do |item| %>
-        <tr class="<%= row_class_for_item(item.name) %>">
-          <th class="rowh"><%= item.name %></th>
-          <% @periods.each do |p| %>
-            <% cell = @cell_map[p.id][item.id] %>
-            <td class="num"><%= display_cell(cell, item_name: item.name) %></td>
-          <% end %>
-          <% (max_months - @periods.size).times do %>
-            <td></td>
-          <% end %>
-          <td></td> <!-- 右スペース -->
-        </tr>
+        <% sections[section_for_item(item.name)] << item %>
       <% end %>
+
+      <%# --- 2) 表示順を固定し、各区分ごとに見出しを1回だけ出す --- %>
+      <% [:attendance, :wage, :deduction, :summary, :other].each do |sec| %>
+        <% next if sections[sec].empty? %>
+
+        <tr class="section-row">
+          <th><%= section_title(sec) %></th>
+          <% @periods.each do %><td></td><% end %>
+          <% (max_months - @periods.size).times do %><td></td><% end %>
+          <td></td>
+        </tr>
+
+        <% sections[sec].each do |item| %>
+          <tr class="<%= row_class_for_item(item.name) %>">
+            <th class="rowh"><%= item.name %></th>
+            <% @periods.each do |p| %>
+              <% cell = @cell_map[p.id][item.id] %>
+              <% warn = anomaly_reason_item(item, cell).present? %>
+              <td class="num <%= 'warn' if warn %>" title="<%= anomaly_reason_item(item, cell) %>">
+                <%= display_cell(cell, item: item) %>
+              </td>
+            <% end %>
+            <% (max_months - @periods.size).times do %><td></td><% end %>
+            <td></td>
+          </tr>
+        <% end %>
+      <% end %>
+
+
+
+
+
     </table>
   </div>
 <% end %>

@@ -19,57 +19,102 @@ module FormatHelper
     format("%d:%02d", h, m)
   end
 
+
+    def basic_row_index
+      @basic_row_index ||= Item.find_by(name: "基本給")&.row_index
+    end
+
+
+    def time_like_item?(item)
+      name = item.name.to_s
+      # 「時間」を含むものは常に“時間”
+      return true if name.include?("時間")
+
+      # 「残業/深夜/早出/遅刻/早退」は“上（基本給より上）にある場合のみ”時間扱い
+      if basic_row_index && item.row_index && item.row_index < basic_row_index
+        return true if name.match?(/残業|深夜|早出|遅刻|早退/)
+      end
+
+      false
+    end
+
+
+
+
+
+
+
   # cell と item から最適表示を決める
   # - item名に「時間」が含まれる → 時間として表示（amountがあればそれを時間数として扱う）
   # - raw が "1900-01-01T..." 形式 → Excelの時間とみなして hours に変換
-  def display_cell(cell, item_name:)
-    return "" unless cell
+    def display_cell(cell, item:)
+      return "" unless cell
 
-    name  = item_name.to_s
-    raw   = cell.raw
-    raw_s = raw.to_s.strip
-    num   = cell.amount # 数値で保存されていればここに入っている（nil可）
+      raw_s = cell.raw.to_s.strip
+      num   = cell.amount
+      is_time = time_like_item?(item)
 
-    # 1) Excelダミー日付（1899/1900…）→ hh:mm に統一
-    #    例: 1899-12-31 21:00, 1899-12-31T21:00:00+00:00, 1900-01-01T8:00Z
-    if raw_s.match?(/\A(18|19)\d{2}-\d{2}-\d{2}(?:[ T]\d{1,2}:\d{2}(?::\d{2})?)?(?:Z|[+-]\d{2}:\d{2})?\z/)
-      begin
-        t = Time.parse(raw_s)
-        midnight = Time.new(t.year, t.month, t.day, 0, 0, 0, t.utc_offset)
-        hours = (t - midnight) / 3600.0
-        return fmt_hours(hours)
-      rescue
-        # 後段へフォールバック
+      # 1) 1899/1900 系のダミー日付は “時刻” として扱う
+      if raw_s.match?(/\A(18|19)\d{2}-\d{2}-\d{2}(?:[ T]\d{1,2}:\d{2}(?::\d{2})?)?(?:Z|[+-]\d{2}:\d{2})?\z/)
+        begin
+          t = Time.parse(raw_s)
+          midnight = Time.new(t.year, t.month, t.day, 0, 0, 0, t.utc_offset)
+          hours = (t - midnight) / 3600.0
+          return fmt_hours(hours)
+        rescue
+        end
       end
+
+      if is_time
+        # 2) "H:M(:S)" 文字列（"1:1" も "1:01" に丸める）
+        if raw_s.match?(/\A(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?\z/)
+          h = Regexp.last_match(1).to_i
+          m = Regexp.last_match(2).to_i
+          s = (Regexp.last_match(3) || "0").to_i
+          return fmt_hours(h + m/60.0 + s/3600.0)
+        end
+        # 3) 整数文字列（"18"）は 18:00 とみなす
+        if raw_s.match?(/\A\d+\z/)
+          return fmt_hours(raw_s.to_i)
+        end
+        # 4) amount が秒（>1000）なら時間に
+        return fmt_hours(num.to_f / 3600.0) if num && num.to_f > 1000
+        # 5) Excel 小数日(0〜1未満) → 時間
+        return fmt_hours(num.to_f * 24.0)   if num && num.to_f >= 0 && num.to_f < 1
+        # 6) 小数時間（7.5 等）
+        return fmt_hours(num.to_f)          if num
+      end
+
+      # 7) ここまで来たら金額/日数の通常表示
+      return fmt_number(num) if num
+      return fmt_number(raw_s.to_f) if raw_s.match?(/\A-?\d+(?:\.\d+)?\z/)
+      raw_s
     end
 
-    # 2) この項目が「時間系」か？
-    #    平日残業/所定外/法定外/休出/深夜/早出/遅刻/早退 などを時間扱い
-    time_like = name.match?(/時間|残業|所定外|法定外|休出|深夜|早出|遅刻|早退/)
+    def anomaly_reason_item(item, cell)
+      return nil unless cell
+      name = item.name.to_s
 
-    if time_like
-      # 2-1) "hh:mm(:ss)" の文字列はそのまま（表示は統一でOK）
-      return raw_s if raw_s.match?(/\A\d{1,2}:\d{2}(?::\d{2})?\z/)
+      # 値を数値化（amount 優先）
+      val =
+        if cell.amount
+          cell.amount.to_f
+        elsif (s = cell.raw.to_s.strip).match?(/\A-?\d+(?:\.\d+)?\z/)
+          s.to_f
+        else
+          nil
+        end
 
-      if num
-        # 2-2) 1000超は秒とみなして h へ
-        return fmt_hours(num.to_f / 3600.0) if num.to_f > 1000
-        # 2-3) 0〜1 の小数は Excel の時刻（1 日 = 1.0）とみなす
-        return fmt_hours(num.to_f * 24.0) if num.to_f >= 0 && num.to_f <= 1
-        # 2-4) それ以外は「時間数（小数）」とみなす
-        return fmt_hours(num.to_f)
+      if time_like_item?(item)
+        hours = val && val > 1000 ? (val / 3600.0) : val
+        return "時間が負、または多すぎ" if hours && (hours < 0 || hours > 24*31)
+      elsif name.include?("日数") || name.end_with?("日")
+        return "日数が負、または31超" if val && (val < 0 || val > 31)
+      elsif name.match?(/給|税|保険|報酬|合計|額|金/)
+        return "金額が大きすぎる可能性" if val && val.abs > 10_000_000
       end
+      nil
     end
-
-    # 3) ここまでで時間として出せなければ、数値は通常フォーマット
-    return fmt_number(num) if num
-
-    # 4) 数字文字列は整形
-    return fmt_number(raw_s.to_f) if raw_s.match?(/\A-?\d+(?:\.\d+)?\z/)
-
-    # 5) 文字列のまま
-    raw_s
-  end
 
 
 
