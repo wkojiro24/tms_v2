@@ -1,0 +1,95 @@
+<h1 style="font-size:16px; margin:8px 0 12px;">社員レポート（個人）</h1>
+<p style="margin:0 0 10px;">
+  社員：<strong><%= @employee.code %></strong> <%= @employee.name %>
+  &nbsp;|&nbsp;
+  <%= link_to "直近4ヶ月",  reports_employee_path(@employee, months: 4) %>
+  <%= link_to "直近6ヶ月",  reports_employee_path(@employee, months: 6), style: "margin-left:8px;" %>
+  <%= link_to "直近12ヶ月", reports_employee_path(@employee, months: 12), style: "margin-left:8px;" %>
+  &nbsp;|&nbsp;<%= link_to "一覧へ戻る", reports_employees_path %>
+</p>
+
+<style>
+/* ===== Excel風の最小スタイル（このビューだけに適用） ===== */
+.report-wrap { max-width: 1200px; margin: 10px auto; padding: 0 10px; }
+.report-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-size: 14px; }
+.report-table th, .report-table td {
+  border: 1px solid #d9d9d9;
+  padding: 6px 8px;
+  vertical-align: middle;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.report-table thead th {
+  position: sticky; top: 0;
+  background: #f7fbff; /* ヘッダ淡水色 */
+  z-index: 2; font-weight: 600;
+  text-align: center;
+}
+.report-table .item-col {
+  position: sticky; left: 0; z-index: 1;
+  background: #fff; font-weight: 600;
+}
+.report-table tbody tr:nth-child(even) { background: #fcfcfc; } /* うっすら縞 */
+.report-table .num { text-align: right; }
+
+/* 罫線を細かく（Excelっぽく） */
+.report-table th, .report-table td { border-color: #e3e3e3; }
+.report-table tbody tr + tr th,
+.report-table tbody tr + tr td { border-top-color: #ededed; }
+
+/* キーセル（課税支給合計／差引支給合計）の色味 */
+.badge-money { display:inline-block; font-size: 12px; padding: 2px 6px; border-radius: 10px; background:#eaf7ff; color:#004e7a; margin-left:6px; }
+.highlight-money { background:#eaf7ff; font-weight:700; }
+
+/* 外側に少し余白 */
+.section-pad { margin-top: 8px; }
+</style>
+
+<div class="report-wrap section-pad">
+  <% # 列幅: 左(項目)=220px、残りを期間数で均等割り %>
+  <table class="report-table">
+    <colgroup>
+      <col style="width:220px;">
+      <% equal = "calc((100% - 220px) / #{@periods.size})" %>
+      <% @periods.each do |_p| %>
+        <col style="width:<%= equal %>;">
+      <% end %>
+    </colgroup>
+
+    <thead>
+      <tr>
+        <th class="item-col">項目</th>
+        <% @periods.each do |p| %>
+          <th><%= "#{p.year}年#{p.month}月" %></th>
+        <% end %>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% if @items.blank? %>
+        <tr>
+          <td colspan="<%= 1 + @periods.size %>" style="text-align:center; color:#888; padding:14px;">
+            データがありません
+          </td>
+        </tr>
+      <% else %>
+        <% @items.each do |item| %>
+          <% name = item.name.to_s.strip %>
+          <% key_row = (name == "課税支給合計" || name == "差引支給合計") %>
+          <tr class="<%= key_row ? 'highlight-money' : '' %>">
+            <th class="item-col">
+              <%= name %>
+              <% if key_row %><span class="badge-money">重要</span><% end %>
+            </th>
+
+            <% @periods.each do |per| %>
+              <% cell = @cell_map[[per.id, item.id]] %>
+              <td class="num">
+                <%= display_cell(cell, item: item).to_s.strip %>
+              </td>
+            <% end %>
+          </tr>
+        <% end %>
+      <% end %>
+    </tbody>
+  </table>
+</div>

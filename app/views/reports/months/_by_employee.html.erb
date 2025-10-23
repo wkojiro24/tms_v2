@@ -1,0 +1,28 @@
+<div class="report compact">
+  <table class="report-table">
+    <thead>
+      <tr>
+        <th class="rowh">社員</th>
+        <% @items.each do |item| %>
+          <th class="<%= item.above_basic ? 'time-col' : 'money-col' %>" title="<%= item.name %>">
+            <%= item.name.truncate(3) %>
+          </th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% @employees.each do |emp| %>
+        <tr>
+          <th class="rowh"><%= emp.code %> <%= emp.name %></th>
+          <% @items.each do |item| %>
+            <% cell = @cell_by[[emp.id, item.id]] %>
+            <td class="<%= item.above_basic ? 'num time' : 'num money' %>">
+              <%= display_cell(cell, item: item) %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+<%= render partial: "table_style" %>

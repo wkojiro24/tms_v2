@@ -1,0 +1,111 @@
+<!-- app/views/admin/items/index.html.erb -->
+<h1>項目の並べ替え</h1>
+<p>ドラッグして並び替え、「保存」を押してください。</p>
+
+<style>
+  .list { list-style: none; padding: 0; margin: 0; max-width: 760px; }
+  .row  { display:flex; gap:12px; align-items:center; padding:10px 12px; border:1px solid #ddd; margin:6px 0; background:#fff; border-radius:10px; transition: background .15s, transform .05s, box-shadow .1s; }
+  .handle { cursor: grab; font-weight:700; }
+  .name { flex:1; }
+  .meta { color:#555; font-size:12px; }
+
+
+  .row.basis   { background:#eef6ff; border-color:#bcdcff; }
+
+  .row.money   { background:#f3fbef; border-color:#c8e9bf; }
+
+  .row.unknown { background:#f8f8f8; }
+
+  .row.dragging { opacity:.8; outline:3px solid #4da3ff; transform:scale(1.01); }
+
+  .row.over-before { box-shadow: 0 -3px 0 0 #4da3ff inset; }
+
+  .row.over-after  { box-shadow: 0  3px 0 0 #4da3ff inset; }
+
+  .row.selected { outline:3px dashed #999; background:#fffbe6; }
+</style>
+
+<%= form_with url: sort_admin_items_path, method: :patch, local: true, id: "sort-form" do %>
+  <ul class="list" id="sortable">
+    <% @items.each_with_index do |item, i| %>
+        <% cls = item.above_basic == false ? "money" : (item.above_basic ? "basis" : "unknown") %>
+        <li class="row <%= cls %>" draggable="true" tabindex="0">
+        <span class="handle">≡</span>
+        <span class="name"><%= item.name %></span>
+        <span class="meta">
+            <%= item.above_basic.nil? ? "上下:不明" : (item.above_basic ? "上" : "下") %>
+            / pos:<%= item.position || "-" %> / row:<%= item.row_index || "-" %>
+        </span>
+        <input type="hidden" name="order[][id]" value="<%= item.id %>">
+        <input type="hidden" name="order[][position]" value="<%= i+1 %>">
+        </li>
+    <% end %>
+  </ul>
+  <p style="margin-top:12px"><%= submit_tag "保存" %></p>
+<% end %>
+
+<script>
+  const list = document.getElementById('sortable');
+  let dragEl = null;
+
+  // クリックで選択トグル（わかりやすさ用・任意）
+  list.addEventListener('click', (e) => {
+    const row = e.target.closest('.row');
+    if (!row) return;
+    // Ctrl/Command で複数選択にしたい場合はここを拡張
+    // ここでは単純トグル
+    row.classList.toggle('selected');
+  });
+
+  list.addEventListener('dragstart', (e) => {
+    dragEl = e.target.closest('.row');
+    if (!dragEl) return;
+    dragEl.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', '');
+  });
+
+  list.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const target = e.target.closest('.row');
+    if (!dragEl || !target || dragEl === target) return;
+
+    // ドロップガイド（上/下）を表示
+    const rect = target.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+
+    target.classList.toggle('over-before', before);
+    target.classList.toggle('over-after',  !before);
+  });
+
+  list.addEventListener('dragleave', (e) => {
+    const target = e.target.closest('.row');
+    if (!target) return;
+    target.classList.remove('over-before', 'over-after');
+  });
+
+  list.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const target = e.target.closest('.row');
+    if (!dragEl || !target || dragEl === target) return;
+
+    // どちら側に入れるか
+    const rect = target.getBoundingClientRect();
+    const before = (e.clientY - rect.top) < rect.height / 2;
+
+    target.classList.remove('over-before', 'over-after');
+    list.insertBefore(dragEl, before ? target : target.nextSibling);
+  });
+
+  list.addEventListener('dragend', () => {
+    if (dragEl) dragEl.classList.remove('dragging');
+    dragEl = null;
+
+    // 並べ替え後、position hidden を採番し直す
+    [...list.querySelectorAll('.row')].forEach((row, idx) => {
+      const posInput = row.querySelector('input[name="order[][position]"]');
+      if (posInput) posInput.value = idx + 1;
+    });
+  });
+</script>
+

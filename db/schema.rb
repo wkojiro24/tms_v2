@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_23_093355) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_23_124931) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -38,7 +38,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_23_093355) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "row_index"
-    t.index ["name"], name: "index_items_on_name", unique: true
+    t.integer "position"
+    t.boolean "above_basic"
+    t.index ["name", "above_basic"], name: "index_items_on_name_and_above_basic", unique: true
+    t.index ["name"], name: "index_items_on_name"
+    t.index ["position"], name: "index_items_on_position"
   end
 
   create_table "payroll_cells", force: :cascade do |t|
@@ -52,6 +56,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_23_093355) do
     t.index ["employee_id"], name: "index_payroll_cells_on_employee_id"
     t.index ["item_id"], name: "index_payroll_cells_on_item_id"
     t.index ["period_id", "employee_id", "item_id"], name: "idx_payroll_cells_unique", unique: true
+    t.index ["period_id", "employee_id", "item_id"], name: "index_cells_on_period_employee_item", unique: true
     t.index ["period_id"], name: "index_payroll_cells_on_period_id"
   end
 

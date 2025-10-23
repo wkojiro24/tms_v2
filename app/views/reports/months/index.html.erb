@@ -1,0 +1,6 @@
+<h2>月別レポート</h2>
+<ul>
+  <% @periods.each do |p| %>
+    <li><%= link_to "#{p.year}年#{p.month}月", reports_month_path(p) %></li>
+  <% end %>
+</ul>

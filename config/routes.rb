@@ -7,8 +7,6 @@ Rails.application.routes.draw do
   # 閲覧用（GET だけ /payrolls）
   resources :payrolls, only: [:index]
 
-  # ★ 追加：社員レポート（1アクション）
-  get "reports/employee", to: "reports#employee", as: :employee_report
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
@@ -20,4 +18,15 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  namespace :admin do
+    resources :items, only: [:index] do
+      collection { patch :sort }  # 並びの一括保存
+    end
+  end
+  namespace :reports do
+    resources :months, only: [:index, :show]
+    resources :employees, only: [:index, :show]
+  end
+
 end

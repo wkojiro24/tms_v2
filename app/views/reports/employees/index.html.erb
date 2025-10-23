@@ -1,0 +1,12 @@
+<h2>社員レポート（一覧）</h2>
+
+<%= form_with url: reports_employees_path, method: :get, local: true do %>
+  <label for="employee_id">社員を選択：</label>
+  <%= select_tag :employee_id,
+        options_from_collection_for_select(@employees, :id, ->(e){ "#{e.code} / #{e.name}" }),
+        include_blank: "選択してください",
+        id: "employee_id" %>
+  <%= submit_tag "表示" %>
+<% end %>
+
+<p style="margin-top: 1rem; color: #666;">※ 社員を選んで「表示」を押すと、月ごとの推移（Show）に移動します。</p>

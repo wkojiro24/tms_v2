@@ -1,0 +1,18 @@
+<h2><%= @period.year %>年<%= @period.month %>月 レポート</h2>
+
+<div style="margin:8px 0;">
+  <%= link_to "社員×項目（横に項目）", reports_month_path(@period, view: "by_employee"), class: (params[:view]!="by_item" ? "btn on" : "btn") %>
+  <%= link_to "項目×社員（横に社員）", reports_month_path(@period, view: "by_item"),     class: (params[:view]=="by_item" ? "btn on" : "btn") %>
+</div>
+
+<% if params[:view] == "by_item" %>
+  <%= render partial: "by_item" %>
+<% else %>
+  <%= render partial: "by_employee" %>
+<% end %>
+
+<style>
+  .btn{display:inline-block;padding:6px 10px;border:1px solid #ccc;border-radius:6px;text-decoration:none;margin-right:6px;background:#f7f7f7}
+  .btn.on{background:#e6f3ff;border-color:#7bb7ff}
+</style>
+

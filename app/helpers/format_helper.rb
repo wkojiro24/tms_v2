@@ -26,18 +26,22 @@ module FormatHelper
 
 
     def time_like_item?(item)
-      name = item.name.to_s
-      # 「時間」を含むものは常に“時間”
-      return true if name.include?("時間")
+      # ① 最優先で above_basic を見る（下は金額扱い）
+      if item.respond_to?(:above_basic) && !item.above_basic.nil?
+        return false unless item.above_basic   # false=下=金額
+        name = item.name.to_s
+        return true if name.include?("時間") || name.match?(/残業|深夜|早出|遅刻|早退/)
+        return false
+      end
 
-      # 「残業/深夜/早出/遅刻/早退」は“上（基本給より上）にある場合のみ”時間扱い
+      # ② 古いデータの保険（行位置ベース）
+      name = item.name.to_s
+      return true if name.include?("時間")
       if basic_row_index && item.row_index && item.row_index < basic_row_index
         return true if name.match?(/残業|深夜|早出|遅刻|早退/)
       end
-
       false
     end
-
 
 
 

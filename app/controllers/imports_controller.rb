@@ -34,41 +34,37 @@ class ImportsController < ApplicationController
   # - 8行目=社員名（「○名」「合計/小計/計」除外）
   # - B9以降=項目名をユニーク抽出
 
+  # ========= REPLACE: persist_all =========
   def persist_all(result, uploaded)
     # 1) 期間
-    per = if (p = result.dig(:meta, :period))
-      Period.find_or_create_by!(year: p[:year], month: p[:month])
-    else
-      # 期間が取れない時は保存しない（仕様上）
-      return
-    end
+    pinfo = result.dig(:meta, :period)
+    return unless pinfo
+    per = Period.find_or_create_by!(year: pinfo[:year], month: pinfo[:month])
 
-    # 2) 社員（codeで upsert 風）
+    # 2) 社員（code で upsert）: 列 ⇒ Employee
     emp_map = {}
     result[:employees].each do |e|
       emp = Employee.find_or_initialize_by(code: e[:code])
       emp.name = e[:name].to_s.strip if e[:name].present?
       emp.save!
-      emp_map[e[:col_index]] = emp   # ← 列Index→Employee の対応表
+      emp_map[e[:col_index]] = emp
     end
 
-    # 3) 項目（name で find_or_create）＋ 期間別の行順を保存
+    # 3) 項目（name + above_basic で一意）: 行 ⇒ Item
     item_map = {}
     result[:items].each do |it|
       name = it[:name].to_s.strip
-      row  = it[:row_index]
+      ab   = it[:above_basic] # true/false
 
-      item = Item.find_or_create_by!(name: name)
-      item_map[row] = item  # 行Index→Item の対応表（そのまま）
-
-        # ★ここが追加：Period×Item の行番号を upsert して記録
-        ItemOrder.find_or_initialize_by(period: per, item: item).tap do |io|
-          io.row_index = row
-          io.save!
-        end
+      item = Item.find_or_create_by!(name: name, above_basic: ab)
+      # 並び用の row_index は最小値を保持
+      if item.row_index.nil? || (it[:row_index] && it[:row_index] < item.row_index)
+        item.update!(row_index: it[:row_index])
       end
+      item_map[it[:row_index]] = item
+    end
 
-    # 4) セル値（行×列の交差を走査して保存）
+    # 4) セル値（交差）を保存
     x     = open_spreadsheet(uploaded)
     sheet = x.sheet(0)
 
@@ -77,78 +73,91 @@ class ImportsController < ApplicationController
         val = sheet.cell(row_idx, col_idx)
         next if val.nil? || (val.respond_to?(:empty?) && val.empty?)
 
-        raw = val.to_s.strip
+        raw = val.to_s
         amount = begin
-          # 数値として読めるものだけ小数で格納
           Float(raw)
         rescue
           nil
         end
 
-        cell = PayrollCell.find_or_initialize_by(
-          period: per, employee: emp, item: item
-        )
+        cell = PayrollCell.find_or_initialize_by(period: per, employee: emp, item: item)
         cell.raw    = raw
         cell.amount = amount
         cell.save!
       end
     end
   end
-
-  # ========= REPLACE from here =========
-  def sheet_parse(uploaded)
-    require "roo"
-
-    x     = open_spreadsheet(uploaded)
-    sheet = x.sheet(0)
-
-    a6 = sheet.cell(6, 1)
-
-    # A6 が「数値」または「YYYY年M月(度給与)」ならOK
-    period = extract_period(a6)            # {year: 2025, month: 8} or nil
-    ok_a6  = numeric?(a6) || period.present?
-
-    emp_codes = row_values(sheet, 7).map { |v| v.to_s.strip } # 7行目=社員番号
-    emp_names = row_values(sheet, 8)                          # 8行目=社員名
-
-    employees = []
-    emp_names.each_with_index do |name, i|
-      next if skip_name?(name)
-      code = emp_codes[i]
-      next if skip_code?(code)
-      employees << { col_index: 2 + i, code: code, name: name.to_s.strip }
-    end
-
-    # B9以降の項目（ユニーク化・空白整形）
-    items = []
-    r = 9
-    loop do
-      break if r > (sheet.last_row.to_i + 5)
-      b = sheet.cell(r, 2) # B列
-      row_blank = (sheet.row(r) rescue []).compact.empty?
-      break if b.nil? && row_blank
-      if b.present?
-        name = b.to_s.gsub(/\p{Space}+/, " ").strip
-        items << { row_index: r, name: name }
-      end
-      r += 1
-    end
-    # 表示用は名前ユニークにしつつ、最初に出た行番号を保持
-    items = items
-              .group_by { _1[:name] }
-              .map { |name, arr| { row_index: arr.first[:row_index], name: name } }
+  # ========= REPLACE END =========
 
 
-    {
-      ok: ok_a6,
-      errors: (ok_a6 ? [] : ["A6が数値ではありません（判別不能）"]),
-      meta: { a6: a6, period: period },
-      employees: employees,
-      items: items
-    }
+# ========= REPLACE: sheet_parse =========
+def sheet_parse(uploaded)
+  require "roo"
+
+  x     = open_spreadsheet(uploaded)
+  sheet = x.sheet(0)
+
+  a6 = sheet.cell(6, 1)
+
+  # A6 = "2025年8月度給与" などを判定
+  period = extract_period(a6)            # {year: 2025, month: 8} or nil
+  ok_a6  = numeric?(a6) || period.present?
+
+  # 7行=社員番号 / 8行=氏名
+  emp_codes = row_values(sheet, 7).map { |v| v.to_s.strip }
+  emp_names = row_values(sheet, 8)
+
+  employees = []
+  emp_names.each_with_index do |name, i|
+    next if skip_name?(name)
+    code = emp_codes[i]
+    next if skip_code?(code)
+    employees << { col_index: 2 + i, code: code, name: name.to_s.strip }
   end
-  # ========= REPLACE to here =========
 
+  # --- 基本給の行位置を先に探す（最初に見つかった行）
+  last_row  = sheet.last_row.to_i
+  basic_row = nil
+  (9..(last_row + 5)).each do |rr|
+    v = sheet.cell(rr, 2)
+    next if v.nil?
+    nm = v.to_s.gsub(/\p{Space}+/, " ").strip
+    if nm == "基本給"
+      basic_row = rr
+      break
+    end
+  end
+
+  # B9以降の項目（name+above_basic の組でユニーク化）
+  tmp = []
+  r = 9
+  loop do
+    break if r > (last_row + 5)
+    b = sheet.cell(r, 2) # B列
+    row_blank = (sheet.row(r) rescue []).compact.empty?
+    break if b.nil? && row_blank
+
+    if b.present?
+      name  = b.to_s.gsub(/\p{Space}+/, " ").strip
+      above = basic_row ? (r < basic_row) : true # 基本給より上=時間系、見つからなければ仮に true
+      tmp << { row_index: r, name: name, above_basic: above }
+    end
+    r += 1
+  end
+
+  items = tmp
+            .group_by { |h| [h[:name], h[:above_basic]] }
+            .map { |(nm, ab), arr| { row_index: arr.first[:row_index], name: nm, above_basic: ab } }
+
+  {
+    ok: ok_a6,
+    errors: (ok_a6 ? [] : ["A6が数値ではありません（判別不能）"]),
+    meta: { a6: a6, period: period },
+    employees: employees,
+    items: items
+  }
+end
+# ========= REPLACE END =========
   # ========= ADD below here =========
   def extract_period(v)
     s = v.to_s.gsub(/\p{Space}/, "")  # 全/半角スペース除去

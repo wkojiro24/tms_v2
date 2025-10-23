@@ -1,0 +1,19 @@
+<style>
+  .report.compact { overflow:auto; }
+  .report.compact .report-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 13px; }
+  .report.compact th, .report.compact td {
+    padding: 6px 8px; border: 1px solid #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  /* ヘッダ固定 */
+  .report.compact thead th { position: sticky; top: 0; background: #fff; z-index: 2; }
+  .report.compact .rowh { position: sticky; left: 0; background: #fff; z-index: 3; width: 14rem; }
+  /* 数値寄せ */
+  .report.compact .num { text-align: right; }
+  .time-col  { background: #eef6ff; }
+  .money-col { background: #f3fbef; }
+  .empcol { background: #f7fbff; }
+  /* 社員ヘッダ（by_item 用） */
+    .report.compact .empcol { white-space: normal; min-width: 8rem; text-align: center; }
+    .report.compact .emphead { display: flex; flex-direction: column; line-height: 1.1; }
+    .report.compact .emphead .code { font-weight: 600; }
+</style>
