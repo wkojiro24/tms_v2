@@ -1,5 +1,6 @@
 # app/services/imports/payroll_importer.rb
 # frozen_string_literal: true
+
 module Imports
   class PayrollImporter < BaseImporter
     def parse(uploaded)
@@ -46,11 +47,11 @@ module Imports
         r += 1
       end
 
-      items = tmp.group_by { |h| [h[:name], h[:above_basic]] }
+      items = tmp.group_by { |h| [ h[:name], h[:above_basic] ] }
                  .map { |(nm, ab), arr| { row_index: arr.first[:row_index], name: nm, above_basic: ab } }
 
       { ok: ok_a6,
-        errors: (ok_a6 ? [] : ["A6が数値ではありません（判別不能）"]),
+        errors: (ok_a6 ? [] : [ "A6が数値ではありません（判別不能）" ]),
         meta: { a6: a6, period: period },
         employees: employees,
         items: items }

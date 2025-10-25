@@ -12,7 +12,7 @@ class VehicleAlias < ApplicationRecord
   def self.normalize(str)
     return nil if str.blank?
     str.to_s
-      .tr("０-９Ａ-Ｚａ-ｚ 　ー‐−–—","0-9A-Za-z     -----") # 全角→半角
+      .tr("０-９Ａ-Ｚａ-ｚ 　ー‐−–—", "0-9A-Za-z     -----") # 全角→半角
       .gsub(/\p{Space}+/, "")                                # 空白除去（NBSP含む）
       .upcase                                                # 英字は大文字
   end

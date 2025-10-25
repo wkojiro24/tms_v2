@@ -1,7 +1,7 @@
+# test/models/vehicle_test.rb
 require "test_helper"
-
-class VehicleTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+class VehicleModelPlaceholderTest < ActiveSupport::TestCase
+  test "placeholder" do
+    assert true
+  end
 end

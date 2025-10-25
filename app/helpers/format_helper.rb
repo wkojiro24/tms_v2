@@ -48,9 +48,9 @@ module FormatHelper
 
 
 
-  # cell と item から最適表示を決める
-  # - item名に「時間」が含まれる → 時間として表示（amountがあればそれを時間数として扱う）
-  # - raw が "1900-01-01T..." 形式 → Excelの時間とみなして hours に変換
+    # cell と item から最適表示を決める
+    # - item名に「時間」が含まれる → 時間として表示（amountがあればそれを時間数として扱う）
+    # - raw が "1900-01-01T..." 形式 → Excelの時間とみなして hours に変換
     def display_cell(cell, item:)
       return "" unless cell
 
@@ -119,7 +119,4 @@ module FormatHelper
       end
       nil
     end
-
-
-
 end

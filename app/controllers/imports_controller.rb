@@ -1,9 +1,10 @@
 # app/controllers/imports_controller.rb
 # frozen_string_literal: true
+
 class ImportsController < ApplicationController
   KIND_REGISTRY = {
     "payroll"  => "Imports::PayrollImporter",
-    "vehicles" => "Imports::VehicleImporter",
+    "vehicles" => "Imports::VehicleImporter"
   }.freeze
 
   def new
@@ -22,7 +23,7 @@ class ImportsController < ApplicationController
     klass_name = KIND_REGISTRY[kind]
     unless klass_name
       flash.now[:alert] = "未対応の種別です：#{kind}"
-      @result = { ok: false, errors: [flash.now[:alert]] }
+      @result = { ok: false, errors: [ flash.now[:alert] ] }
       return render :new, status: :unprocessable_entity
     end
 
@@ -43,7 +44,7 @@ class ImportsController < ApplicationController
 
     render :new
   rescue => e
-    @result ||= { ok: false, errors: [e.message] }
+    @result ||= { ok: false, errors: [ e.message ] }
     flash.now[:alert] = "取込失敗：#{e.message}"
     render :new, status: :internal_server_error
   end

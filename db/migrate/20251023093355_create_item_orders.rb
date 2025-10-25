@@ -6,7 +6,6 @@ class CreateItemOrders < ActiveRecord::Migration[7.2]
       t.integer :row_index, null: false
       t.timestamps
     end
-    add_index :item_orders, [:period_id, :item_id], unique: true
+    add_index :item_orders, [ :period_id, :item_id ], unique: true
   end
 end
-

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 class Reports::MonthsController < ApplicationController
   def index
     @periods = Period.order(year: :desc, month: :desc)
@@ -17,6 +18,6 @@ class Reports::MonthsController < ApplicationController
     # { [emp_id, item_id] => cell } のハッシュ
     @cell_by = PayrollCell.where(period_id: @period.id, employee_id: emp_ids, item_id: item_ids)
                           .includes(:employee, :item)
-                          .index_by { |c| [c.employee_id, c.item_id] }
+                          .index_by { |c| [ c.employee_id, c.item_id ] }
   end
 end
