@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_23_124931) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_24_052803) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -68,9 +68,36 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_23_124931) do
     t.index ["year", "month"], name: "index_periods_on_year_and_month", unique: true
   end
 
+  create_table "vehicle_aliases", force: :cascade do |t|
+    t.bigint "vehicle_id", null: false
+    t.string "code", null: false
+    t.integer "kind", default: 0, null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["code"], name: "idx_vehicle_aliases_code_unique_when_active", unique: true, where: "(active = true)"
+    t.index ["code"], name: "index_vehicle_aliases_on_code"
+    t.index ["vehicle_id"], name: "index_vehicle_aliases_on_vehicle_id"
+  end
+
+  create_table "vehicles", force: :cascade do |t|
+    t.string "name"
+    t.string "number_plate"
+    t.string "manufacturer"
+    t.string "model_code"
+    t.integer "year"
+    t.integer "mileage_km"
+    t.datetime "archived_at"
+    t.string "vehicle_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["vehicle_code"], name: "index_vehicles_on_vehicle_code"
+  end
+
   add_foreign_key "item_orders", "items"
   add_foreign_key "item_orders", "periods"
   add_foreign_key "payroll_cells", "employees"
   add_foreign_key "payroll_cells", "items"
   add_foreign_key "payroll_cells", "periods"
+  add_foreign_key "vehicle_aliases", "vehicles"
 end

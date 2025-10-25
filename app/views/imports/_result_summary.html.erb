@@ -1,0 +1,26 @@
+<!-- A) 共有パーシャル：app/views/imports/_result_summary.html.erb -->
+<% r = local_assigns[:result] || @result %>
+<% k = (local_assigns[:kind] || params[:kind] || r.dig(:meta, :kind) || "payroll").to_s %>
+
+<h2>取り込み結果</h2>
+
+<% if r && r[:ok] %>
+  <% period = r.dig(:meta, :period) %>
+  <% if period.present? %>
+    <p>対象年月：<strong><%= period[:year] %>年 <%= period[:month] %>月</strong></p>
+  <% end %>
+
+  <% if k == "vehicles" %>
+    <p>種別：車両（vehicles）</p>
+    <p><%= link_to "車両一覧を見る", vehicles_path %></p>
+  <% else %>
+    <p>種別：給与（payroll）</p>
+    <p>社員候補：<%= r[:employees]&.size || 0 %> 名 ／ 項目候補：<%= r[:items]&.size || 0 %> 件</p>
+    <p style="color:#666">※ 保存するには「保存まで行う」にチェックして再実行してください。</p>
+  <% end %>
+<% elsif r %>
+  <h3 style="color:#b00">エラー</h3>
+  <ul style="color:#b00"><% Array(r[:errors]).each { |e| %><li><%= e %></li><% } %></ul>
+<% else %>
+  <p>まだ結果はありません。</p>
+<% end %>

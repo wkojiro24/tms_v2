@@ -1,0 +1,57 @@
+<%= form_with(model: vehicle) do |form| %>
+  <% if vehicle.errors.any? %>
+    <div style="color: red">
+      <h2><%= pluralize(vehicle.errors.count, "error") %> prohibited this vehicle from being saved:</h2>
+
+      <ul>
+        <% vehicle.errors.each do |error| %>
+          <li><%= error.full_message %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :name, style: "display: block" %>
+    <%= form.text_field :name %>
+  </div>
+
+  <div>
+    <%= form.label :number_plate, style: "display: block" %>
+    <%= form.text_field :number_plate %>
+  </div>
+
+  <div>
+    <%= form.label :manufacturer, style: "display: block" %>
+    <%= form.text_field :manufacturer %>
+  </div>
+
+  <div>
+    <%= form.label :model_code, style: "display: block" %>
+    <%= form.text_field :model_code %>
+  </div>
+
+  <div>
+    <%= form.label :year, style: "display: block" %>
+    <%= form.number_field :year %>
+  </div>
+
+  <div>
+    <%= form.label :mileage_km, style: "display: block" %>
+    <%= form.number_field :mileage_km %>
+  </div>
+
+  <div>
+    <%= form.label :archived_at, style: "display: block" %>
+    <%= form.datetime_field :archived_at %>
+  </div>
+
+  <div>
+    <%= form.label :vehicle_code, style: "display: block" %>
+    <%= form.text_field :vehicle_code %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
