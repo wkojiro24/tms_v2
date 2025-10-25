@@ -1,7 +1,7 @@
+# test/models/attachment_test.rb
 require "test_helper"
-
-class AttachmentTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+class AttachmentModelPlaceholderTest < ActiveSupport::TestCase
+  test "placeholder" do
+    assert true
+  end
 end

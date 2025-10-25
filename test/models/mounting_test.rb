@@ -1,7 +1,7 @@
+# test/models/mounting_test.rb
 require "test_helper"
-
-class MountingTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+class MountingModelPlaceholderTest < ActiveSupport::TestCase
+  test "placeholder" do
+    assert true
+  end
 end

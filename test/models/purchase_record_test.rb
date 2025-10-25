@@ -1,7 +1,7 @@
+# test/models/purchase_record_test.rb
 require "test_helper"
-
-class PurchaseRecordTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+class PurchaseRecordModelPlaceholderTest < ActiveSupport::TestCase
+  test "placeholder" do
+    assert true
+  end
 end

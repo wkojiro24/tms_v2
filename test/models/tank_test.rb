@@ -1,7 +1,7 @@
+# test/models/tank_test.rb
 require "test_helper"
-
-class TankTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+class TankModelPlaceholderTest < ActiveSupport::TestCase
+  test "placeholder" do
+    assert true
+  end
 end

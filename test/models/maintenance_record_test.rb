@@ -1,7 +1,7 @@
+# test/models/maintenance_record_test.rb
 require "test_helper"
-
-class MaintenanceRecordTest < ActiveSupport::TestCase
-  # test "the truth" do
-  #   assert true
-  # end
+class MaintenanceRecordModelPlaceholderTest < ActiveSupport::TestCase
+  test "placeholder" do
+    assert true
+  end
 end
