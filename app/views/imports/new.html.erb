@@ -1,72 +1,46 @@
 <!-- app/views/imports/new.html.erb -->
-<h1>取り込み（超シンプル）</h1>
+<h1>データインポート</h1>
 
-<% if flash[:alert].present? %>
-  <div style="padding:8px; background:#fee; border:1px solid #fbb; margin-bottom:12px;">
-    <%= flash[:alert] %>
-  </div>
+<!-- フラッシュ -->
+<% if flash[:notice].present? %><p style="color:green"><%= flash[:notice] %></p><% end %>
+<% if flash[:alert].present?  %><p style="color:#b00"><%= flash[:alert]  %></p><% end %>
+
+<!-- バリデーションエラー -->
+<% if defined?(@form) && @form&.errors&.any? %>
+  <ul style="color:#b00; margin-left:1em;">
+    <% @form.errors.full_messages.each do |m| %><li><%= m %></li><% end %>
+  </ul>
 <% end %>
 
-<%= form_with url: imports_path,
-              local: true, 
-              multipart: true,
-              data: { turbo: false } do %> 
-  <p><%= file_field_tag :file, accept: ".xlsx,.xls,.csv" %></p>
-  
+<!-- 取込フォーム -->
+<%= form_with url: imports_path, multipart: true, local: true do %>
+  <p>
+    対象：
+    <%= select_tag :kind,
+      options_for_select([["給与（payroll）","payroll"],["車両（vehicles）","vehicles"]],
+                         (@form&.kind.presence || params[:kind] || "payroll")) %>
+  </p>
+  <p>
+    ファイル：<input type="file" name="file" accept=".xlsx,.xls,.csv" required>
+  </p>
   <p>
     <label>
-      <%= check_box_tag :save, "1" %>
-      取り込み結果をDBに保存（期間・社員・項目）
+      <input type="checkbox" name="save" value="1" <%= "checked" if params[:save] == "1" %>>
+      （payrollのみ）プレビュー後に保存まで行う
     </label>
   </p>
-
-  <p><%= submit_tag "取り込む" %></p>
+  <p><button type="submit">取り込む</button></p>
 <% end %>
 
-<% if @result.present? %>
-  <hr>
-  <h2>取り込み結果</h2>
+<hr>
 
-  <p>
-    対象年月：
-    <% if @result[:meta][:period] %>
-      <strong><%= @result[:meta][:period][:year] %>年 <%= @result[:meta][:period][:month] %>月</strong>
-    <% else %>
-      <em>不明</em>
-    <% end %>
-  </p>
+<!-- 結果表示（共通パーシャル） -->
+<%= render "imports/result_summary",
+           result: @result,
+           kind:   (params[:kind] || @result&.dig(:meta, :kind) || "payroll") %>
 
-  <h3>社員（employees）</h3>
-  <% if @result[:employees].present? %>
-    <table border="1" cellpadding="6" cellspacing="0">
-      <tr><th>列Index</th><th>社員番号</th><th>氏名</th></tr>
-      <% @result[:employees].each do |e| %>
-        <tr>
-          <td><%= e[:col_index] %></td>
-          <td><%= e[:code] %></td>
-          <td><%= e[:name] %></td>
-        </tr>
-      <% end %>
-    </table>
-  <% else %>
-    <p>（社員は見つかりませんでした）</p>
-  <% end %>
-
-  <h3>項目（items）</h3>
-  <% if @result[:items].present? %>
-    <ul>
-      <% @result[:items].each do |it| %>
-        <li><%= it %></li>
-      <% end %>
-    </ul>
-  <% else %>
-    <p>（項目は見つかりませんでした）</p>
-  <% end %>
-
-  <details style="margin-top:10px;">
-    <summary>JSON（デバッグ用）</summary>
-    <pre style="white-space:pre-wrap; background:#f7f7f7; padding:10px; border:1px solid #ddd;">
-<%= JSON.pretty_generate(@result) %>
-    </pre>
-  </details>
-<% end %>
+<hr>
+<ul>
+  <li><%= link_to "ダッシュボードへ戻る", root_path %></li>
+  <li><%= link_to "車両一覧へ", vehicles_path %></li>
+</ul>
