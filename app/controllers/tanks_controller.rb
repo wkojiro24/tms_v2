@@ -14,6 +14,12 @@ class TanksController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   end
+
+  def show
+    @tank = Tank.find(params[:id])
+    @purchase_records = @tank.purchase_records.order(id: :desc).limit(100)
+  end
+
   private
   def tank_params
     params.require(:tank).permit(

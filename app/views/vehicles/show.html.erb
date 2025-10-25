@@ -1,0 +1,35 @@
+<h1>車両詳細</h1>
+
+<p>
+  <strong>ID:</strong> <%= @vehicle.id %><br>
+  <strong>区分:</strong> <%= @vehicle.kind %><br>
+  <strong>ナンバー:</strong> <%= @vehicle.number_plate %><br>
+  <strong>通称:</strong> <%= @vehicle.nickname %><br>
+  <strong>メーカー/型式:</strong> <%= [@vehicle.maker, @vehicle.model].compact.join(" / ") %><br>
+  <strong>初度登録日:</strong> <%= @vehicle.first_registered_on %><br>
+  <strong>営業所:</strong> <%= @vehicle.depot_name %><br>
+  <strong>管理者:</strong> <%= @vehicle.manager_name %>（<%= @vehicle.manager_contact %>）<br>
+</p>
+
+<p>
+  <%= link_to "購入記録を追加",
+        new_purchase_record_path(asset_ref: "Vehicle:#{@vehicle.id}", back_to: vehicle_path(@vehicle)) %>
+  |
+  <%= link_to "車両一覧へ戻る", vehicles_path %>
+</p>
+
+<h2>購入記録</h2>
+<table border="1" cellpadding="4">
+  <tr>
+    <th>ID</th><th>購入日</th><th>仕入先</th><th>金額(円)</th><th>備考</th>
+  </tr>
+  <% @purchase_records.each do |pr| %>
+    <tr>
+      <td><%= pr.id %></td>
+      <td><%= pr.purchased_on %></td>
+      <td><%= pr.vendor_name %></td>
+      <td style="text-align:right;"><%= number_with_delimiter(pr.total_price_yen) %></td>
+      <td><%= pr.note %></td>
+    </tr>
+  <% end %>
+</table>

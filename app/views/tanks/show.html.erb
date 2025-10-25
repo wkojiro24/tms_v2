@@ -1,0 +1,36 @@
+<h1>タンク詳細</h1>
+
+<p>
+  <strong>ID:</strong> <%= @tank.id %><br>
+  <strong>製番:</strong> <%= @tank.serial_no %><br>
+  <strong>メーカー:</strong> <%= @tank.maker %><br>
+  <strong>初度登録日:</strong> <%= @tank.first_registered_on %><br>
+  <strong>材質/ライニング:</strong> <%= [@tank.material_detail, @tank.lining].compact.join(" / ") %><br>
+  <strong>室数:</strong> <%= @tank.compartments %><br>
+  <strong>容量(L):</strong> <%= @tank.capacity_l %><br>
+  <strong>営業所:</strong> <%= @tank.depot_name %><br>
+  <strong>管理者:</strong> <%= @tank.manager_name %>（<%= @tank.manager_contact %>）<br>
+</p>
+
+<p>
+  <%= link_to "購入記録を追加",
+        new_purchase_record_path(asset_ref: "Tank:#{@tank.id}", back_to: tank_path(@tank)) %>
+  |
+  <%= link_to "タンク一覧へ戻る", tanks_path %>
+</p>
+
+<h2>購入記録</h2>
+<table border="1" cellpadding="4">
+  <tr>
+    <th>ID</th><th>購入日</th><th>仕入先</th><th>金額(円)</th><th>備考</th>
+  </tr>
+  <% @purchase_records.each do |pr| %>
+    <tr>
+      <td><%= pr.id %></td>
+      <td><%= pr.purchased_on %></td>
+      <td><%= pr.vendor_name %></td>
+      <td style="text-align:right;"><%= number_with_delimiter(pr.total_price_yen) %></td>
+      <td><%= pr.note %></td>
+    </tr>
+  <% end %>
+</table>

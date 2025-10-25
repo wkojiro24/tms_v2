@@ -9,6 +9,7 @@
     <th>ナンバー</th>
     <th>通称</th>
     <th>営業所</th>
+    <th>操作</th>
   </tr>
   <% @vehicles.each do |v| %>
     <tr>
@@ -17,6 +18,11 @@
       <td><%= v.number_plate %></td>
       <td><%= v.nickname %></td>
       <td><%= v.depot_name %></td>
+      <td>
+        <%= link_to "詳細", vehicle_path(v) %> |
+        <%= link_to "購入記録を追加",
+              new_purchase_record_path(asset_ref: "Vehicle:#{v.id}", back_to: vehicle_path(v)) %>
+      </td>
     </tr>
   <% end %>
 </table>

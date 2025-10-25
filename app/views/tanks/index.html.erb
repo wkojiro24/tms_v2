@@ -4,11 +4,7 @@
 
 <table border="1" cellpadding="4">
   <tr>
-    <th>ID</th>
-    <th>製番</th>
-    <th>メーカー</th>
-    <th>材質</th>
-    <th>室数</th>
+    <th>ID</th><th>製番</th><th>メーカー</th><th>材質</th><th>室数</th><th>操作</th>
   </tr>
   <% @tanks.each do |t| %>
     <tr>
@@ -17,6 +13,11 @@
       <td><%= t.maker %></td>
       <td><%= t.material_detail %></td>
       <td><%= t.compartments %></td>
+      <td>
+        <%= link_to "詳細", tank_path(t) %> |
+        <%= link_to "購入記録を追加",
+              new_purchase_record_path(asset_ref: "Tank:#{t.id}", back_to: tank_path(t)) %>
+      </td>
     </tr>
   <% end %>
 </table>

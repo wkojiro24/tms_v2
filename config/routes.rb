@@ -1,8 +1,8 @@
 Rails.application.routes.draw do
   root "dashboard#home"   # トップはこれ1つに固定
 
-  resources :vehicles, only: [ :index, :new, :create ]
-  resources :tanks,    only: [ :index, :new, :create ]
+  resources :vehicles, only: [ :index, :new, :create, :show ]
+  resources :tanks,    only: [ :index, :new, :create, :show ]
   resources :purchase_records, only: [ :index, :new, :create ]
   resources :imports,  only: [ :new, :create ]
   resources :payrolls, only: [ :index ]

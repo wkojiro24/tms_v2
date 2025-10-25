@@ -14,6 +14,13 @@ class VehiclesController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   end
+
+  def show
+    @vehicle = Vehicle.find(params[:id])
+    @purchase_records = @vehicle.purchase_records.order(id: :desc).limit(100)
+  end
+
+
   private
   def vehicle_params
     params.require(:vehicle).permit(
