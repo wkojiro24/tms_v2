@@ -1,5 +1,6 @@
 # app/services/imports/vehicle_importer.rb
 # frozen_string_literal: true
+
 module Imports
   class VehicleImporter < BaseImporter
     def import(uploaded)

@@ -4,5 +4,4 @@ class Vehicle < ApplicationRecord
   has_many :tanks, through: :mountings
   enum :kind, { head: "head", chassis: "chassis" }
   validates :kind, presence: true
-
 end

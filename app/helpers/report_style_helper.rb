@@ -1,8 +1,8 @@
 module ReportStyleHelper
   # 行の太線・強調（従来のまま使いたければここで管理）
-  GROUP_TOP_BEFORE   = ["基本給"].freeze
-  GROUP_BOTTOM_AFTER = ["振込支給額"].freeze
-  HILIGHT_TOTALS     = ["課税支給合計", "差引支給合計"].freeze
+  GROUP_TOP_BEFORE   = [ "基本給" ].freeze
+  GROUP_BOTTOM_AFTER = [ "振込支給額" ].freeze
+  HILIGHT_TOTALS     = [ "課税支給合計", "差引支給合計" ].freeze
 
   def row_class_for_item(name)
     klass = []

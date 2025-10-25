@@ -11,8 +11,8 @@ class EnsureItemsUniqueByNameAndAbove < ActiveRecord::Migration[7.2]
     # PayrollCell.delete_all; Item.delete_all はコンソール or runner で別途実行
 
     # 新しい一意制約: (name, above_basic)
-    unless index_exists?(:items, [:name, :above_basic], name: "index_items_on_name_and_above_basic", unique: true)
-      add_index :items, [:name, :above_basic], unique: true, name: "index_items_on_name_and_above_basic"
+    unless index_exists?(:items, [ :name, :above_basic ], name: "index_items_on_name_and_above_basic", unique: true)
+      add_index :items, [ :name, :above_basic ], unique: true, name: "index_items_on_name_and_above_basic"
     end
   end
 
@@ -22,4 +22,3 @@ class EnsureItemsUniqueByNameAndAbove < ActiveRecord::Migration[7.2]
     # 必要なら旧 index を戻すが、今回は省略
   end
 end
-

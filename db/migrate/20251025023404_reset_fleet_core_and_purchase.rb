@@ -63,7 +63,7 @@ class ResetFleetCoreAndPurchase < ActiveRecord::Migration[7.1]
       t.text    :note
       t.timestamps
     end
-    add_index :mountings, [:tank_id, :vehicle_id, :mounted_on], name: "idx_mountings_key"
+    add_index :mountings, [ :tank_id, :vehicle_id, :mounted_on ], name: "idx_mountings_key"
 
     # --- PurchaseRecord（購入記録：ポリモーフィック） ---
     create_table :purchase_records do |t|
@@ -83,7 +83,7 @@ class ResetFleetCoreAndPurchase < ActiveRecord::Migration[7.1]
       t.text    :note
       t.timestamps
     end
-    add_index :purchase_records, [:asset_type, :asset_id, :purchased_on], name: "idx_pr_asset_date"
+    add_index :purchase_records, [ :asset_type, :asset_id, :purchased_on ], name: "idx_pr_asset_date"
 
     # --- MaintenanceRecord（整備・修理：ポリモーフィック） ---
     create_table :maintenance_records do |t|
@@ -104,7 +104,7 @@ class ResetFleetCoreAndPurchase < ActiveRecord::Migration[7.1]
       t.text    :note
       t.timestamps
     end
-    add_index :maintenance_records, [:asset_type, :asset_id, :performed_on], name: "idx_mr_asset_date"
+    add_index :maintenance_records, [ :asset_type, :asset_id, :performed_on ], name: "idx_mr_asset_date"
 
     # --- Inspections（検査：ポリモーフィック） ---
     create_table :inspections do |t|
@@ -120,7 +120,7 @@ class ResetFleetCoreAndPurchase < ActiveRecord::Migration[7.1]
       t.text    :note
       t.timestamps
     end
-    add_index :inspections, [:asset_type, :asset_id, :valid_until], name: "idx_insp_asset_valid"
+    add_index :inspections, [ :asset_type, :asset_id, :valid_until ], name: "idx_insp_asset_valid"
 
     # --- Attachments（写真・証憑：ポリモーフィック） ---
     create_table :attachments do |t|
@@ -137,7 +137,6 @@ class ResetFleetCoreAndPurchase < ActiveRecord::Migration[7.1]
       t.text    :note
       t.timestamps
     end
-    add_index :attachments, [:asset_type, :asset_id]
+    add_index :attachments, [ :asset_type, :asset_id ]
   end
 end
-

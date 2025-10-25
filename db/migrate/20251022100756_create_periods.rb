@@ -5,6 +5,6 @@ class CreatePeriods < ActiveRecord::Migration[7.2]
       t.integer :month, null: false
       t.timestamps
     end
-  add_index :periods, [:year, :month], unique: true 
+  add_index :periods, [ :year, :month ], unique: true
   end
 end

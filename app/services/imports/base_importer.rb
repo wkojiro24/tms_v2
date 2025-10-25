@@ -1,5 +1,6 @@
 # app/services/imports/base_importer.rb
 # frozen_string_literal: true
+
 require "roo"
 module Imports
   class BaseImporter
@@ -16,7 +17,7 @@ module Imports
     end
     def open_first_sheet(uploaded)
       x = open_spreadsheet(uploaded)
-      [x.sheet(0), x.sheet(0).row(1).map(&:to_s)]
+      [ x.sheet(0), x.sheet(0).row(1).map(&:to_s) ]
     end
     def row_values(sheet, row_idx)
       last_col = sheet.last_column || 100

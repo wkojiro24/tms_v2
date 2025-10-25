@@ -9,7 +9,7 @@ class CreatePayrollCells < ActiveRecord::Migration[7.2]
 
       t.timestamps
     end
-    add_index :payroll_cells, [:period_id, :employee_id, :item_id],
+    add_index :payroll_cells, [ :period_id, :employee_id, :item_id ],
           unique: true,
           name: "idx_payroll_cells_unique"
   end

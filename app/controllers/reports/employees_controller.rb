@@ -8,7 +8,7 @@ class Reports::EmployeesController < ApplicationController
     end
   end
 
-  # 個人（Show）: 月次推移を表示
+    # 個人（Show）: 月次推移を表示
     def show
       @employee = Employee.find_by(id: params[:id]) || Employee.find_by!(code: params[:id])
 
@@ -28,10 +28,7 @@ class Reports::EmployeesController < ApplicationController
 
       # マップもセルだけで作る（JOIN しない）
       @cell_map = rel.select(:period_id, :item_id, :raw, :amount).to_a
-                    .index_by { |c| [c.period_id, c.item_id] }
+                    .index_by { |c| [ c.period_id, c.item_id ] }
       # === 置き換えここまで ===
     end
-
 end
-
-

@@ -17,7 +17,7 @@ class PayrollsController < ApplicationController
               .includes(:item)
 
     # ★ 並び：row_index（nilは後ろ）→ name
-    @items = cells.map(&:item).uniq.sort_by { |it| [it.row_index || 9_999_999, it.name] }
+    @items = cells.map(&:item).uniq.sort_by { |it| [ it.row_index || 9_999_999, it.name ] }
     @cell_by_item_id = cells.index_by { |c| c.item_id }
   end
 end

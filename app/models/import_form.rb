@@ -26,4 +26,3 @@ class ImportForm
     file.respond_to?(:original_filename) ? file.original_filename : file.to_s
   end
 end
-
