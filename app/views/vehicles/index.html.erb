@@ -1,16 +1,22 @@
-<p style="color: green"><%= notice %></p>
+<h1>車両一覧</h1>
 
-<% content_for :title, "Vehicles" %>
+<p><%= link_to "新規登録", new_vehicle_path %></p>
 
-<h1>Vehicles</h1>
-
-<div id="vehicles">
-  <% @vehicles.each do |vehicle| %>
-    <%= render vehicle %>
-    <p>
-      <%= link_to "Show this vehicle", vehicle %>
-    </p>
+<table border="1" cellpadding="4">
+  <tr>
+    <th>ID</th>
+    <th>区分</th>
+    <th>ナンバー</th>
+    <th>通称</th>
+    <th>営業所</th>
+  </tr>
+  <% @vehicles.each do |v| %>
+    <tr>
+      <td><%= v.id %></td>
+      <td><%= v.kind %></td>
+      <td><%= v.number_plate %></td>
+      <td><%= v.nickname %></td>
+      <td><%= v.depot_name %></td>
+    </tr>
   <% end %>
-</div>
-
-<%= link_to "New vehicle", new_vehicle_path %>
+</table>

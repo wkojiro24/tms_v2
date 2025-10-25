@@ -1,0 +1,29 @@
+<h1>タンク 登録</h1>
+
+<%= form_with model: @tank do |f| %>
+  <% if @tank.errors.any? %>
+    <div style="color:red;"><%= @tank.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div>製番: <%= f.text_field :serial_no %></div>
+  <div>メーカー: <%= f.text_field :maker %></div>
+  <div>初度登録日: <%= f.date_field :first_registered_on %></div>
+  <div>材質: <%= f.text_field :material_detail %></div>
+  <div>ライニング: <%= f.text_field :lining %></div>
+  <div>室数: <%= f.text_field :compartments %></div>
+  <div>圧力等級: <%= f.text_field :pressure_rating %></div>
+  <div>バルブ: <%= f.text_field :valves %></div>
+  <div>容量(L): <%= f.number_field :capacity_l %></div>
+  <div>自重(kg): <%= f.number_field :curb_weight_kg %></div>
+  <div>現在の積載物: <%= f.text_field :current_cargo %></div>
+  <div>現荷主: <%= f.text_field :current_shipper %></div>
+  <div>営業所: <%= f.text_field :depot_name %></div>
+  <div>管理者: <%= f.text_field :manager_name %></div>
+  <div>連絡先: <%= f.text_field :manager_contact %></div>
+  <div>写真URL: <%= f.text_field :cover_image_url %></div>
+  <div>備考: <%= f.text_area :note %></div>
+
+  <%= f.submit "登録" %>
+<% end %>
+
+<p><%= link_to "一覧へ戻る", tanks_path %></p>

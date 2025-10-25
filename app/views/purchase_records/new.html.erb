@@ -1,0 +1,41 @@
+<h1>購入記録 登録</h1>
+
+<%= form_with model: @purchase_record do |f| %>
+  <% if @purchase_record.errors.any? %>
+    <div style="color:red;"><%= @purchase_record.errors.full_messages.to_sentence %></div>
+  <% end %>
+
+  <div>
+    対象（車両/タンク）:
+    <%= select_tag "purchase_record[asset_ref]",
+    options_for_select(
+        [["-- 車両 選択 --", ""]] +
+        @vehicles.map { |v| ["車両 #{v.number_plate} (##{v.id})", "Vehicle:#{v.id}"] } +
+        [["-- タンク 選択 --", ""]] +
+        @tanks.map    { |t| ["タンク #{t.serial_no} (##{t.id})", "Tank:#{t.id}"] }
+    ),
+    required: true
+    %>
+  </div>
+
+  <div>購入日: <%= f.date_field :purchased_on %></div>
+  <div>仕入先: <%= f.text_field :vendor_name %></div>
+  <div>合計金額(円): <%= f.number_field :total_price_yen, step: 1 %></div>
+
+  <details style="margin:8px 0;">
+    <summary>詳細</summary>
+    <div>本体価格(円): <%= f.number_field :base_price_yen, step: 1 %></div>
+    <div>消費税(円): <%= f.number_field :tax_yen, step: 1 %></div>
+    <div>支払条件: <%= f.text_field :payment_terms %></div>
+    <div>資金区分: <%= f.text_field :funding %></div>
+    <div>契約番号: <%= f.text_field :contract_ref %></div>
+    <div>保証期限: <%= f.date_field :warranty_until %></div>
+    <div>初期状態: <%= f.text_field :initial_condition %></div>
+    <div>書類URL: <%= f.url_field :document_url %></div>
+    <div>備考: <%= f.text_area :note %></div>
+  </details>
+
+  <%= f.submit "登録" %>
+<% end %>
+
+<p><%= link_to "一覧へ戻る", purchase_records_path %></p>

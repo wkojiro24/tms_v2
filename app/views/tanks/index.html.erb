@@ -1,0 +1,22 @@
+<h1>タンク一覧</h1>
+
+<p><%= link_to "新規登録", new_tank_path %></p>
+
+<table border="1" cellpadding="4">
+  <tr>
+    <th>ID</th>
+    <th>製番</th>
+    <th>メーカー</th>
+    <th>材質</th>
+    <th>室数</th>
+  </tr>
+  <% @tanks.each do |t| %>
+    <tr>
+      <td><%= t.id %></td>
+      <td><%= t.serial_no %></td>
+      <td><%= t.maker %></td>
+      <td><%= t.material_detail %></td>
+      <td><%= t.compartments %></td>
+    </tr>
+  <% end %>
+</table>

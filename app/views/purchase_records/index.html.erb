@@ -1,0 +1,32 @@
+<h1>購入記録</h1>
+
+<p><%= link_to "新規登録", new_purchase_record_path %></p>
+
+<table border="1" cellpadding="4">
+  <tr>
+    <th>ID</th>
+    <th>対象</th>
+    <th>購入日</th>
+    <th>仕入先</th>
+    <th>金額(円)</th>
+    <th>備考</th>
+  </tr>
+  <% @purchase_records.each do |pr| %>
+    <tr>
+      <td><%= pr.id %></td>
+      <td>
+        <% if pr.asset_type == "Vehicle" %>
+          車両(#<%= pr.asset_id %>) <%= pr.asset&.number_plate %>
+        <% elsif pr.asset_type == "Tank" %>
+          タンク(#<%= pr.asset_id %>) <%= pr.asset&.serial_no %>
+        <% else %>
+          -
+        <% end %>
+      </td>
+      <td><%= pr.purchased_on %></td>
+      <td><%= pr.vendor_name %></td>
+      <td style="text-align:right;"><%= number_with_delimiter(pr.total_price_yen) %></td>
+      <td><%= pr.note %></td>
+    </tr>
+  <% end %>
+</table>

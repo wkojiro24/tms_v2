@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   resources :vehicles, only: [ :index, :new, :create ]
   resources :tanks,    only: [ :index, :new, :create ]
-
+  resources :purchase_records, only: [ :index, :new, :create ]
   resources :imports,  only: [ :new, :create ]
   resources :payrolls, only: [ :index ]
 
