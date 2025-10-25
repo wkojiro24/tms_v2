@@ -5,4 +5,3 @@ class VehicleModelPlaceholderTest < ActiveSupport::TestCase
     assert true
   end
 end
-
