@@ -1,6 +1,6 @@
 # app/controllers/purchase_records_controller.rb
 class PurchaseRecordsController < ApplicationController
-  before_action :load_assets, only: [:new, :create]
+  before_action :load_assets, only: [ :new, :create ]
 
   def index
     @purchase_records = PurchaseRecord.order(id: :desc).includes(:asset).limit(100)
