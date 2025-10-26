@@ -8,9 +8,28 @@
   <strong>材質/ライニング:</strong> <%= [@tank.material_detail, @tank.lining].compact.join(" / ") %><br>
   <strong>室数:</strong> <%= @tank.compartments %><br>
   <strong>容量(L):</strong> <%= @tank.capacity_l %><br>
+  <strong>自重(kg):</strong> <%= @tank.curb_weight_kg %><br>
+  <strong>現在の積載物:</strong> <%= @tank.current_cargo %><br>
+  <strong>現荷主:</strong> <%= @tank.current_shipper %><br>
   <strong>営業所:</strong> <%= @tank.depot_name %><br>
   <strong>管理者:</strong> <%= @tank.manager_name %>（<%= @tank.manager_contact %>）<br>
+  <strong>備考:</strong> <%= simple_format(@tank.note) %>
 </p>
+
+<h2>写真</h2>
+<% if @tank.cover_image_url.present? %>
+  <p>
+    <a href="<%= @tank.cover_image_url %>" target="_blank" rel="noopener">
+      <img src="<%= @tank.cover_image_url %>" alt="Tank cover" style="max-width: 320px; height: auto; border: 1px solid #ccc;" />
+    </a><br/>
+    <small>
+      原寸リンク:
+      <%= link_to @tank.cover_image_url, @tank.cover_image_url, target: "_blank", rel: "noopener" %>
+    </small>
+  </p>
+<% else %>
+  <p><em>（写真URL未登録）</em></p>
+<% end %>
 
 <p>
   <%= link_to "購入記録を追加",
@@ -34,3 +53,4 @@
     </tr>
   <% end %>
 </table>
+

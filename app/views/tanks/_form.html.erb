@@ -1,0 +1,47 @@
+<%= form_with model: @tank do |f| %>
+  <% if @tank.errors.any? %>
+    <div style="color:#b00; margin-bottom:8px;">
+      <strong>入力内容にエラーがあります。</strong><br>
+      <ul>
+        <% @tank.errors.full_messages.each do |msg| %>
+          <li><%= msg %></li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <fieldset style="padding:8px; border:1px solid #ddd; margin-bottom:12px;">
+    <legend>基本情報</legend>
+    <p>製番: <%= f.text_field :serial_no %></p>
+    <p>メーカー: <%= f.text_field :maker %></p>
+    <p>初度登録年月日: <%= f.date_field :first_registered_on %></p>
+    <p>タンク材質: <%= f.text_field :material_detail %></p>
+    <p>ライニング: <%= f.text_field :lining %></p>
+    <p>室数: <%= f.text_field :compartments %></p>
+    <p>圧力等級: <%= f.text_field :pressure_rating %></p>
+    <p>バルブ/積み卸方法: <%= f.text_field :valves %></p>
+    <p>容量(L): <%= f.number_field :capacity_l, step: 1 %></p>
+    <p>自重(kg): <%= f.number_field :curb_weight_kg, step: 1 %></p>
+  </fieldset>
+
+  <fieldset style="padding:8px; border:1px solid #ddd; margin-bottom:12px;">
+    <legend>運用情報</legend>
+    <p>現在の積載物: <%= f.text_field :current_cargo %></p>
+    <p>現在の荷主: <%= f.text_field :current_shipper %></p>
+    <p>営業所: <%= f.text_field :depot_name %></p>
+    <p>管理者: <%= f.text_field :manager_name %></p>
+    <p>連絡先: <%= f.text_field :manager_contact %></p>
+    <p>写真URL: <%= f.url_field :cover_image_url %></p>
+    <p>備考: <%= f.text_area :note, rows: 4, cols: 60 %></p>
+  </fieldset>
+
+  <fieldset style="padding:8px; border:1px solid #ddd; margin-bottom:12px;">
+    <legend>現在の車両（搭載先）</legend>
+    <p>
+      <%= f.collection_select :vehicle_id, @vehicles, :id, :number_plate,
+            { include_blank: "（未搭載）" } %>
+    </p>
+  </fieldset>
+
+  <p><%= f.submit %></p>
+<% end %>

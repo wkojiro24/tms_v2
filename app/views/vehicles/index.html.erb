@@ -1,28 +1,55 @@
-<h1>車両一覧</h1>
+<h1>車両一覧（車両 × 現在タンク）</h1>
 
-<p><%= link_to "新規登録", new_vehicle_path %></p>
-
-<table border="1" cellpadding="4">
-  <tr>
-    <th>ID</th>
-    <th>区分</th>
-    <th>ナンバー</th>
-    <th>通称</th>
-    <th>営業所</th>
-    <th>操作</th>
-  </tr>
-  <% @vehicles.each do |v| %>
-    <tr>
-      <td><%= v.id %></td>
-      <td><%= v.kind %></td>
-      <td><%= v.number_plate %></td>
-      <td><%= v.nickname %></td>
-      <td><%= v.depot_name %></td>
-      <td>
-        <%= link_to "詳細", vehicle_path(v) %> |
-        <%= link_to "購入記録を追加",
-              new_purchase_record_path(asset_ref: "Vehicle:#{v.id}", back_to: vehicle_path(v)) %>
-      </td>
-    </tr>
+<%= form_with url: vehicles_path, method: :get, local: true do |f| %>
+  営業所: <%= text_field_tag :depot, @depot, size: 10 %>
+  検索: <%= text_field_tag :q, @q, placeholder: "ナンバー/メーカー/通称" %>
+  <%= submit_tag "絞り込む" %>
+  <% if params[:q].present? || params[:depot].present? %>
+    <%= link_to "クリア", vehicles_path %>
   <% end %>
+<% end %>
+
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">
+  <thead style="background:#f5f5f5;">
+    <tr>
+      <th>営業所</th>
+      <th>自動車登録番号</th>
+      <th>初度</th>
+      <th>経過年数</th>
+      <th>輸送品名（現在タンク）</th>
+      <th>タンク製造年月日</th>
+      <th>タンク経過年数</th>
+      <th>シャーシ</th>
+      <th>操作</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @vehicles.each do |v| %>
+      <% t = v.tank %>
+      <tr>
+        <td><%= v.depot_name %></td>
+        <td><%= link_to v.number_plate, vehicle_path(v) %></td>
+        <td><%= ym(v.first_registered_on) %></td>
+        <td><%= ja_age(v.first_registered_on) %></td>
+        <td>
+          <% if t %>
+            <%= t.current_cargo.presence || "（未設定）" %>
+            （<%= link_to t.serial_no, tank_path(t) %>）
+          <% else %>
+            －
+          <% end %>
+        </td>
+        <td><%= t ? ym(t.first_registered_on) : "" %></td>
+        <td><%= t ? ja_age(t.first_registered_on) : "" %></td>
+        <td><%= v.axle_config_text %></td>
+        <td>
+          <% if t %>
+            <%= link_to "搭載を変更", edit_tank_path(t) %>
+          <% else %>
+            <%= link_to "タンクを割り当て", tanks_path(assign_to_vehicle_id: v.id) %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
 </table>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_10_25_023404) do
+ActiveRecord::Schema[7.2].define(version: 2025_10_26_021818) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -99,19 +99,6 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_25_023404) do
     t.index ["asset_type", "asset_id", "performed_on"], name: "idx_mr_asset_date"
   end
 
-  create_table "mountings", force: :cascade do |t|
-    t.bigint "tank_id", null: false
-    t.bigint "vehicle_id", null: false
-    t.date "mounted_on", null: false
-    t.date "removed_on"
-    t.text "note"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["tank_id", "vehicle_id", "mounted_on"], name: "idx_mountings_key"
-    t.index ["tank_id"], name: "index_mountings_on_tank_id"
-    t.index ["vehicle_id"], name: "index_mountings_on_vehicle_id"
-  end
-
   create_table "payroll_cells", force: :cascade do |t|
     t.bigint "period_id", null: false
     t.bigint "employee_id", null: false
@@ -175,7 +162,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_25_023404) do
     t.text "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "vehicle_id"
     t.index ["serial_no"], name: "index_tanks_on_serial_no"
+    t.index ["vehicle_id"], name: "index_tanks_on_vehicle_id"
+    t.index ["vehicle_id"], name: "index_tanks_on_vehicle_id_unique_when_present", unique: true, where: "(vehicle_id IS NOT NULL)"
   end
 
   create_table "vehicles", force: :cascade do |t|
@@ -204,9 +194,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_10_25_023404) do
 
   add_foreign_key "item_orders", "items"
   add_foreign_key "item_orders", "periods"
-  add_foreign_key "mountings", "tanks"
-  add_foreign_key "mountings", "vehicles"
   add_foreign_key "payroll_cells", "employees"
   add_foreign_key "payroll_cells", "items"
   add_foreign_key "payroll_cells", "periods"
+  add_foreign_key "tanks", "vehicles"
 end

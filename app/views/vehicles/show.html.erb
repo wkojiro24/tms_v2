@@ -7,9 +7,31 @@
   <strong>通称:</strong> <%= @vehicle.nickname %><br>
   <strong>メーカー/型式:</strong> <%= [@vehicle.maker, @vehicle.model].compact.join(" / ") %><br>
   <strong>初度登録日:</strong> <%= @vehicle.first_registered_on %><br>
+  <strong>最大積載(kg):</strong> <%= @vehicle.max_payload_kg %><br>
+  <strong>車両重量(kg):</strong> <%= @vehicle.curb_weight_kg %><br>
+  <strong>走行距離(km):</strong> <%= @vehicle.odometer_km %><br>
+  <strong>軸構成:</strong> <%= @vehicle.axle_config_text %><br>
+  <strong>タイヤ本数:</strong> <%= @vehicle.tire_count %><br>
+  <strong>状態:</strong> <%= @vehicle.status %><br>
   <strong>営業所:</strong> <%= @vehicle.depot_name %><br>
   <strong>管理者:</strong> <%= @vehicle.manager_name %>（<%= @vehicle.manager_contact %>）<br>
+  <strong>備考:</strong> <%= simple_format(@vehicle.note) %>
 </p>
+
+<h2>写真</h2>
+<% if @vehicle.cover_image_url.present? %>
+  <p>
+    <a href="<%= @vehicle.cover_image_url %>" target="_blank" rel="noopener">
+      <img src="<%= @vehicle.cover_image_url %>" alt="Vehicle cover" style="max-width: 320px; height: auto; border: 1px solid #ccc;" />
+    </a><br/>
+    <small>
+      原寸リンク:
+      <%= link_to @vehicle.cover_image_url, @vehicle.cover_image_url, target: "_blank", rel: "noopener" %>
+    </small>
+  </p>
+<% else %>
+  <p><em>（写真URL未登録）</em></p>
+<% end %>
 
 <p>
   <%= link_to "購入記録を追加",
@@ -33,3 +55,4 @@
     </tr>
   <% end %>
 </table>
+

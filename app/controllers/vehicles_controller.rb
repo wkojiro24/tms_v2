@@ -1,8 +1,24 @@
 # app/controllers/vehicles_controller.rb
 class VehiclesController < ApplicationController
+  include FleetPairsHelper
+
   def index
-    @vehicles = Vehicle.order(id: :desc).limit(50)
+    @q     = params[:q].to_s.strip
+    @depot = params[:depot].presence
+
+    scope = Vehicle
+              .includes(:tank) # ←N+1防止
+              .order(Arel.sql("COALESCE(depot_name,'~') ASC, COALESCE(number_plate,'~') ASC"))
+
+    scope = scope.where(depot_name: @depot) if @depot
+    if @q.present?
+      like = "%#{@q}%"
+      scope = scope.where("number_plate ILIKE :x OR maker ILIKE :x OR nickname ILIKE :x", x: like)
+    end
+
+    @vehicles = scope
   end
+
   def new
     @vehicle = Vehicle.new
   end

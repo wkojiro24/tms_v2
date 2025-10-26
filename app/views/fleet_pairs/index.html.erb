@@ -1,0 +1,42 @@
+<h1>車両 × タンク（現在の組み合わせ一覧）</h1>
+
+<p>
+  <%= link_to "車両一覧", vehicles_path %> /
+  <%= link_to "タンク一覧", tanks_path %>
+</p>
+
+<table border="1" cellpadding="6" cellspacing="0" style="border-collapse:collapse; width:100%;">
+  <thead style="background:#f5f5f5;">
+    <tr>
+      <th>営業所</th>
+      <th>自動車登録番号</th>
+      <th>初度</th>
+      <th>経過年数</th>
+      <th>輸送品名</th>
+      <th>タンク製造年月日</th>
+      <th>タンク経過年数</th>
+      <th>シャーシ</th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @mountings.each do |m| %>
+      <% v = m.vehicle; t = m.tank %>
+      <tr>
+        <td><%= v&.depot_name || t&.depot_name %></td>
+        <td>
+          <% if v %>
+            <%= link_to v.number_plate, vehicle_path(v) %>
+          <% else %>
+            －
+          <% end %>
+        </td>
+        <td><%= ym(v&.first_registered_on) %></td>
+        <td><%= ja_age(v&.first_registered_on) %></td>
+        <td><%= t&.current_cargo %></td>
+        <td><%= ym(t&.first_registered_on) %></td>
+        <td><%= ja_age(t&.first_registered_on) %></td>
+        <td><%= v&.axle_config_text %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
