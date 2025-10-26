@@ -18,6 +18,7 @@
       <th>材質</th>
       <th>室数</th>
       <th>現在の車両</th>
+      <th>タンク</th>
       <th>操作</th>
       <% if target_vehicle_id %><th>割り当て</th><% end %>
     </tr>
@@ -31,6 +32,7 @@
         <td><%= t.material_detail %></td>
         <td><%= t.compartments %></td>
         <td><%= t.vehicle ? link_to(t.vehicle.number_plate, vehicle_path(t.vehicle)) : "（未搭載）" %></td>
+         <td><% t = v.tank %> </td>
         <td>
           <%= link_to "詳細", tank_path(t) %> |
           <%= link_to "編集", edit_tank_path(t) %>

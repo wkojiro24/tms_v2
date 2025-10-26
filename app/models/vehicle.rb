@@ -6,5 +6,6 @@ class Vehicle < ApplicationRecord
 
   enum :kind, { head: "head", chassis: "chassis" }
   validates :kind, presence: true
+  validates :number_plate, presence: true, uniqueness: true
 end
 

@@ -16,9 +16,16 @@
 <%= form_with url: imports_path, multipart: true, local: true do %>
   <p>
     対象：
-    <%= select_tag :kind,
-      options_for_select([["給与（payroll）","payroll"],["車両（vehicles）","vehicles"]],
-                         (@form&.kind.presence || params[:kind] || "payroll")) %>
+  <%= select_tag :kind,
+    options_for_select(
+      [
+        ["給与（payroll）",        "payroll"],
+        ["車両（vehicles）",       "vehicles"],
+        ["車両+タンク（vehicle_tank）", "vehicle_tank"]
+      ],
+      (@form&.kind.presence || params[:kind] || "payroll")
+    )
+  %>
   </p>
   <p>
     ファイル：<input type="file" name="file" accept=".xlsx,.xls,.csv" required>

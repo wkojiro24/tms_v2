@@ -7,7 +7,7 @@ class ImportForm
 
   validates :file, presence: { message: "ファイルを選択してください" }
   validate  :content_type_check
-  validates :kind, inclusion: { in: %w[payroll vehicles],
+  validates :kind, inclusion: { in: %w[payroll vehicles vehicle_tank],
                                 message: "は不正な値です（payroll / vehicles）" }
 
   def save?
